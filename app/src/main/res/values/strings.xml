@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TowerCheck Logger</string>
+    <string name="a11y_label">TowerCheck Service Mode reader</string>
+    <string name="a11y_desc">Reads the numbers shown on Samsung\'s Service Mode screen (*#0011#), such as Tx Pwr and RSRP, so TowerCheck Logger can save them with your GPS position. It only reads the screen when a log point is taken and does not send anything anywhere.</string>
+</resources>
