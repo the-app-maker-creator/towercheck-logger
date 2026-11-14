@@ -48,7 +48,7 @@ public class ProbeService extends AccessibilityService {
     private static boolean looksLikeServiceMode(CharSequence pkg) {
         if (pkg == null) return false;
         String p = pkg.toString().toLowerCase(Locale.ROOT);
-        return p.contains("servicemode") || p.contains("rilservice") || p.contains("serviceModeApp".toLowerCase(Locale.ROOT));
+        return p.contains("rilservicemode") || p.contains("servicemodeapp");
     }
 
     /** Read all visible text, preferring the Service Mode window if it is on screen. */
@@ -81,8 +81,6 @@ public class ProbeService extends AccessibilityService {
         StringBuilder sb = new StringBuilder();
         collect(root, sb, 0);
         s.text = sb.toString();
-        // Some firmware shows Service Mode text even if the package name differs.
-        if (!s.isServiceMode && s.text.contains("Tx Pwr")) s.isServiceMode = true;
         return s;
     }
 

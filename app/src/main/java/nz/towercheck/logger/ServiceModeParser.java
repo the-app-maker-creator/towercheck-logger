@@ -13,7 +13,7 @@ public final class ServiceModeParser {
 
     /** Column names, in CSV order. */
     public static final String[] KEYS = {
-            "sm_tx_pwr", "sm_rsrp", "sm_rsrq", "sm_rssi", "sm_sinr",
+            "sm_tx_pwr", "sm_tx_mw", "sm_rsrp", "sm_rsrq", "sm_rssi", "sm_sinr",
             "sm_band", "sm_bw", "sm_dl_earfcn", "sm_ul_earfcn", "sm_pci", "sm_cell_id", "sm_tac",
             "sm_rrc", "sm_endc", "sm_nr_rsrp", "sm_nr_rsrq",
             "sm_ul_rb", "sm_ul_mcs", "sm_ant_rsrp_diff"
@@ -21,7 +21,7 @@ public final class ServiceModeParser {
 
     private static final int M = Pattern.MULTILINE | Pattern.CASE_INSENSITIVE;
 
-    private static final Pattern TX = Pattern.compile("Tx\\s*Pwr\\s*:\\s*(-?\\d+)", M);
+    private static final Pattern TX = Pattern.compile("Tx\\s*Pwr\\s*:\\s*(-?\\d+|--)", M);
     private static final Pattern RSRP_LINE = Pattern.compile("^\\s*RSRP\\s*:\\s*(-?\\d+)(.*)$", M);
     private static final Pattern RSRQ = Pattern.compile("RSRQ\\s*:\\s*(-?\\d+)", M);
     private static final Pattern RSSI = Pattern.compile("RSSI\\s*:\\s*(-?\\d+)", M);
@@ -50,7 +50,12 @@ public final class ServiceModeParser {
         for (String k : KEYS) out.put(k, "");
         if (text == null || text.isEmpty()) return out;
 
-        out.put("sm_tx_pwr", first(TX, text, 1));
+        String tx = first(TX, text, 1);
+        out.put("sm_tx_pwr", "--".equals(tx) ? "idle" : tx);
+        if ("--".equals(tx)) out.put("sm_tx_mw", "0");
+        if (!tx.isEmpty() && !"--".equals(tx)) {
+            out.put("sm_tx_mw", String.format(java.util.Locale.US, "%.1f", Math.pow(10, Integer.parseInt(tx) / 10.0)));
+        }
 
         Matcher rl = RSRP_LINE.matcher(text);
         if (rl.find()) {

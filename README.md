@@ -33,4 +33,4 @@ Use **Test: read Service Mode now** to check it's working: tap it, switch to Ser
 
 `time, lat, lon, gps_accuracy_m, speed_kmh, altitude_m, step_m, api_*` (Android readings), `sm_*` (Service Mode readings, e.g. `sm_tx_pwr`, `sm_rsrp`, `sm_ul_rb`), `sm_seen`, `sm_package`, `sm_raw` (all text read from the screen).
 
-Tx Pwr is in dBm: 23 dBm ≈ 200 mW (max), 20 ≈ 100 mW, 10 ≈ 10 mW, 0 ≈ 1 mW.
+Tx Pwr is in dBm (`sm_tx_mw` gives milliwatts): 23 dBm ≈ 200 mW (max), 20 ≈ 100 mW, 10 ≈ 10 mW, 0 ≈ 1 mW. "idle" means Service Mode showed `--`: the phone was not transmitting.

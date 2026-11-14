@@ -157,6 +157,11 @@ public class LoggerService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(Location loc) {
         if (!running || writer == null) return;
+        // Ignore poor GPS fixes (indoors / just started) so jitter doesn't create fake moves.
+        if (loc.hasAccuracy() && loc.getAccuracy() > 25f) {
+            lastSummary = "Waiting for good GPS (±" + Math.round(loc.getAccuracy()) + " m)";
+            return;
+        }
         float step = lastLogged == null ? 0f : loc.distanceTo(lastLogged);
         if (lastLogged != null && step < metres) return;
         lastLogged = loc;
@@ -169,6 +174,20 @@ public class LoggerService extends Service implements LocationListener {
 
     private static String v(int x) {
         return (x == Integer.MAX_VALUE || x == CellInfo.UNAVAILABLE) ? "" : String.valueOf(x);
+    }
+
+    /** LTE band from the downlink channel number (bands used in NZ). */
+    private static String bandFromEarfcn(int e) {
+        if (e < 0 || e == Integer.MAX_VALUE) return "";
+        if (e < 600) return "1";
+        if (e >= 1200 && e < 1950) return "3";
+        if (e >= 2750 && e < 3450) return "7";
+        if (e >= 3450 && e < 3800) return "8";
+        if (e >= 9210 && e < 9660) return "28";
+        if (e >= 37750 && e < 38250) return "38";
+        if (e >= 38650 && e < 39650) return "40";
+        if (e >= 41590 && e < 43590) return "42";
+        return "";
     }
 
     private static String csv(String s) {
@@ -215,6 +234,7 @@ public class LoggerService extends Service implements LocationListener {
                             int[] bands = id.getBands();
                             if (bands != null && bands.length > 0) api[8] = String.valueOf(bands[0]);
                         }
+                        if (api[8].isEmpty()) api[8] = bandFromEarfcn(id.getEarfcn());
                         break;
                     }
                 }
@@ -263,7 +283,7 @@ public class LoggerService extends Service implements LocationListener {
         sum.append(points).append(" points");
         sum.append(" · RSRP ").append(rsrp.isEmpty() ? "?" : rsrp);
         if (seen) {
-            sum.append(" · Tx ").append(tx.isEmpty() ? "not on screen" : tx + " dBm");
+            sum.append(" · Tx ").append(tx.isEmpty() ? "not on screen" : ("idle".equals(tx) ? "idle (not sending)" : tx + " dBm"));
         } else {
             sum.append(" · Service Mode not visible");
         }
